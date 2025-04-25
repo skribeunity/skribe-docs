@@ -1,4 +1,4 @@
-name: Deploy Docusaurus site to GitHub Pages
+name: Build and Deploy Docusaurus Site
 
 on:
   push:
@@ -11,7 +11,7 @@ permissions:
   id-token: write
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -26,16 +26,18 @@ jobs:
         run: npm install
 
       - name: Build Docusaurus site
-        run: npm run build
+        run: |
+          npm run build
+          find ./build -type l -delete
 
-      - name: Upload build as artifact
-        uses: actions/upload-artifact@v4
+      - name: Upload build folder as GitHub Pages artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          path: build/
+          path: ./build
           name: github-pages
 
-  upload:
-    needs: deploy
+  deploy:
+    needs: build
     runs-on: ubuntu-latest
     environment:
       name: github-pages
